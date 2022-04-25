@@ -36,7 +36,23 @@ def reqshift(data,fshift=100,sample_rate=4096):
 	return z
 
 # plot H1 matched filter SNR around event
-def plot_SNR(time, timemax, SNR, pcolor, det, eventname, plottype):
+params_SNR = {'time': None,
+			  'timemax':None,
+			  'SNR':None,
+			  'pcolor':None,
+			  'det':None,
+			  'eventname':None,
+			  'plottype':None
+			 }
+def plot_SNR(params = params_SNR):
+	time = params['time']
+	timemax = params['timemax']
+	SNR = params['SNR']
+	pcolor = params['pcolor']
+	det = params['det']
+	eventname = params['eventname']
+	plottype = params['plottype']
+
 	plt.figure(figsize=(10,8))
 	plt.subplot(2,1,1)
 	plt.plot(time-timemax, SNR, pcolor,label=det+' SNR(t)')
@@ -60,7 +76,27 @@ def plot_SNR(time, timemax, SNR, pcolor, det, eventname, plottype):
 	plt.savefig('figures/'+eventname+"_"+det+"_SNR."+plottype)
 
 # plot H1 whiten data around event
-def plot_whitened(time, tevent, strain_whitenbp, pcolor, det, template_match, timemax, eventname, plottype):
+params_whitened = {'time': None,
+				   'tevent':None,
+				   'strain_whitenbp':None,
+				   'pcolor':None,
+				   'det':None,
+				   'template_match':None,
+				   'timemax':None,
+				   'eventname':None,
+				   'plottype':None
+				   }
+def plot_whitened(params = params_whitened):
+	time = params['time']
+	tevent = params['tevent']
+	strain_whitenbp = params['strain_whitenbp']
+	pcolor = params['pcolor']
+	det = params['det']
+	template_match = params['template_match']
+	timemax = params['timemax']
+	eventname = params['eventname']
+	plottype = params['plottype']
+
 	plt.figure(figsize=(10,8))
 	plt.subplot(2,1,1)
 	plt.plot(time-tevent, strain_whitenbp,pcolor,label=det+' whitened h(t)')
@@ -86,7 +122,31 @@ def plot_whitened(time, tevent, strain_whitenbp, pcolor, det, template_match, ti
                  
 # -- Display PSD and template
 # must multiply by sqrt(f) to plot template fft on top of ASD:
-def plot_ASD(template_fft, datafreq, d_eff, freqs, data_psd, pcolor, det, fs, eventname, plottype):
+
+params_ASD = {'template_fft':None,
+			  'datafreq':None,
+			  'd_eff':None,
+			  'freqs':None,
+			 'data_psd':None,
+			 'pcolor':None,
+			 'det':None,
+			 'fs':None,
+			 'eventname':None,
+			 'plottype':None
+			 }
+
+def plot_ASD(params=params_ASD):
+	template_fft = params['template_fft']
+	datafreq = params['datafreq']
+	d_eff = params['d_eff']
+	freqs = params['freqs']
+	data_psd = params['data_psd']
+	pcolor = params['pcolor']
+	det = params['det']
+	fs = params['fs']
+	eventname = params['eventname']
+	plottype = params['plottype']
+
 	plt.figure(figsize=(10,6))
 	template_f = np.absolute(template_fft)*np.sqrt(np.abs(datafreq)) / d_eff
 	plt.loglog(datafreq, template_f, 'k', label='template(f)*sqrt(f)')
