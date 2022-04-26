@@ -1,5 +1,5 @@
-import ligotools.readligo as rl
-import ligotools.utils as u 
+from ligotools import readligo as rl
+from ligotools import utils as u
 import numpy as np
 from os.path import exists
 from os import remove
