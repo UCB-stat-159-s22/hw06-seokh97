@@ -79,7 +79,7 @@
 
 # ## Set the event name to choose event and the plot type
 
-# In[2]:
+# In[1]:
 
 
 #-- SET ME   Tutorial should work with most binary black hole events
@@ -96,7 +96,7 @@ plottype = "png"
 #plottype = "pdf"
 
 
-# In[3]:
+# In[2]:
 
 
 # Standard python numerical analysis imports:
@@ -122,11 +122,11 @@ from ligotools import utils
 
 # ### Read the event properties from a local json file (download in advance):
 
-# In[4]:
+# In[3]:
 
 
 # Read the event properties from a local json file
-fnjson = "BBH_events_v3.json"
+fnjson = "./data/BBH_events_v3.json"
 try:
     events = json.load(open(fnjson,"r"))
 except IOError:
@@ -143,14 +143,14 @@ except:
     quit()
 
 
-# In[5]:
+# In[4]:
 
 
 # Extract the parameters for the desired event:
 event = events[eventname]
-fn_H1 = event['fn_H1']              # File name for H1 data
-fn_L1 = event['fn_L1']              # File name for L1 data
-fn_template = event['fn_template']  # File name for template waveform
+fn_H1 = "./data/" + event['fn_H1']              # File name for H1 data
+fn_L1 = "./data/" + event['fn_L1']              # File name for L1 data
+fn_template = "./data/" + event['fn_template']  # File name for template waveform
 fs = event['fs']                    # Set sampling rate
 tevent = event['tevent']            # Set approximate event GPS time
 fband = event['fband']              # frequency band for bandpassing signal
@@ -228,7 +228,7 @@ if make_plots:
     plt.ylabel('strain')
     plt.legend(loc='lower right')
     plt.title('Advanced LIGO strain data near '+eventname)
-    plt.savefig(eventname+'_strain.'+plottype)
+    plt.savefig('./figures/'+eventname+'_strain.'+plottype)
 
 
 # The data are dominated by **low frequency noise**; there is no way to see a signal here, without some signal processing.
@@ -280,7 +280,7 @@ if make_plots:
     plt.xlabel('Freq (Hz)')
     plt.legend(loc='upper center')
     plt.title('Advanced LIGO strain data near '+eventname)
-    plt.savefig(eventname+'_ASDs.'+plottype)
+    plt.savefig('figures/'+eventname+'_ASDs.'+plottype)
 
 
 # NOTE that we only plot the data between f_min = 20 Hz and f_max = 2000 Hz.
@@ -454,7 +454,7 @@ if make_plots:
     plt.colorbar()
     plt.axis([-deltat, deltat, 0, 2000])
     plt.title('aLIGO H1 strain data near '+eventname)
-    plt.savefig(eventname+'_H1_spectrogram.'+plottype)
+    plt.savefig('./figures/'+eventname+'_H1_spectrogram.'+plottype)
 
     # Plot the L1 spectrogram:
     plt.figure(figsize=(10,6))
@@ -465,7 +465,7 @@ if make_plots:
     plt.colorbar()
     plt.axis([-deltat, deltat, 0, 2000])
     plt.title('aLIGO L1 strain data near '+eventname)
-    plt.savefig(eventname+'_L1_spectrogram.'+plottype)
+    plt.savefig('./figures/'+eventname+'_L1_spectrogram.'+plottype)
 
 
 # In the above spectrograms, you may see lots of excess power below ~20 Hz, as well as strong spectral lines at 500, 1000, 1500 Hz (also evident in the ASDs above). The lines at multiples of 500 Hz are the harmonics of the "violin modes" of the fibers holding up the mirrors of the Advanced LIGO interferometers.
@@ -495,7 +495,7 @@ if make_plots:
     plt.colorbar()
     plt.axis([-0.5, 0.5, 0, 500])
     plt.title('aLIGO H1 strain data near '+eventname)
-    plt.savefig(eventname+'_H1_spectrogram_whitened.'+plottype)
+    plt.savefig('figures/'+eventname+'_H1_spectrogram_whitened.'+plottype)
 
     # Plot the L1 whitened spectrogram around the signal
     plt.figure(figsize=(10,6))
@@ -506,7 +506,7 @@ if make_plots:
     plt.colorbar()
     plt.axis([-0.5, 0.5, 0, 500])
     plt.title('aLIGO L1 strain data near '+eventname)
-    plt.savefig(eventname+'_L1_spectrogram_whitened.'+plottype)
+    plt.savefig('figures/'+eventname+'_L1_spectrogram_whitened.'+plottype)
 
 
 # Loud (high SNR) signals may be visible in these spectrograms.  Compact object mergers show a characteristic "chirp" as the signal rises in frequency.  If you can't see anything, try
@@ -546,8 +546,8 @@ f_template.close()
 template_offset = 16.
 
 # whiten the templates:
-template_p_whiten = whiten(template_p,psd_H1,dt)
-template_c_whiten = whiten(template_c,psd_H1,dt)
+template_p_whiten = utils.whiten(template_p,psd_H1,dt)
+template_c_whiten = utils.whiten(template_c,psd_H1,dt)
 template_p_whitenbp = filtfilt(bb, ab, template_p_whiten) / normalization
 template_c_whitenbp = filtfilt(bb, ab, template_c_whiten) / normalization
 
@@ -635,7 +635,7 @@ if make_plots:
     plt.xlabel('time (s)')
     plt.ylabel('v/c')
     #plt.title(eventname+' template v/c')
-    plt.savefig(eventname+'_template.'+plottype)
+    plt.savefig('figures/'+eventname+'_template.'+plottype)
 
 
 # ## Matched filtering to find the signal
@@ -741,7 +741,7 @@ for det in dets:
     template_rolled = np.roll(template_phaseshifted,offset) / d_eff  # Apply time offset and scale amplitude
     
     # Whiten and band-pass the template for plotting
-    template_whitened = whiten(template_rolled,interp1d(freqs, data_psd),dt)  # whiten the template
+    template_whitened = utils.whiten(template_rolled,interp1d(freqs, data_psd),dt)  # whiten the template
     template_match = filtfilt(bb, ab, template_whitened) / normalization # Band-pass the template
     
     print('For detector {0}, maximum at {1:.4f} with SNR = {2:.1f}, D_eff = {3:.2f}, horizon = {4:0.1f} Mpc' 
@@ -786,15 +786,15 @@ deltat_sound = 2.                     # seconds around the event
 indxd = np.where((time >= tevent-deltat_sound) & (time < tevent+deltat_sound))
 
 # write the files:
-utils.write_wavfile(eventname+"_H1_whitenbp.wav",int(fs), strain_H1_whitenbp[indxd])
-utils.write_wavfile(eventname+"_L1_whitenbp.wav",int(fs), strain_L1_whitenbp[indxd])
+utils.write_wavfile('audio/'+eventname+"_H1_whitenbp.wav",int(fs), strain_H1_whitenbp[indxd])
+utils.write_wavfile('audio/'+eventname+"_L1_whitenbp.wav",int(fs), strain_L1_whitenbp[indxd])
 
 # re-whiten the template using the smoothed PSD; it sounds better!
 template_p_smooth = utils.whiten(template_p,psd_smooth,dt)
 
 # and the template, sooming in on [-3,+1] seconds around the merger:
 indxt = np.where((time >= (time[0]+template_offset-deltat_sound)) & (time < (time[0]+template_offset+deltat_sound)))
-utils.write_wavfile(eventname+"_template_whiten.wav",int(fs), template_p_smooth[indxt])
+utils.write_wavfile('audio/'+eventname+"_template_whiten.wav",int(fs), template_p_smooth[indxt])
 
 
 # ### Listen to the whitened template and data
@@ -839,12 +839,12 @@ strain_H1_shifted = utils.reqshift(strain_H1_whitenbp,fshift=fshift,sample_rate=
 strain_L1_shifted = utils.reqshift(strain_L1_whitenbp,fshift=fshift,sample_rate=fs)
 
 # write the files:
-utils.write_wavfile(eventname+"_H1_shifted.wav",int(fs), strain_H1_shifted[indxd])
-utils.write_wavfile(eventname+"_L1_shifted.wav",int(fs), strain_L1_shifted[indxd])
+utils.write_wavfile('audio/'+eventname+"_H1_shifted.wav",int(fs), strain_H1_shifted[indxd])
+utils.write_wavfile('audio/'+eventname+"_L1_shifted.wav",int(fs), strain_L1_shifted[indxd])
 
 # and the template:
 template_p_shifted = utils.reqshift(template_p_smooth,fshift=fshift,sample_rate=fs)
-utils.write_wavfile(eventname+"_template_shifted.wav",int(fs), template_p_shifted[indxt])
+utils.write_wavfile('audio/'+eventname+"_template_shifted.wav",int(fs), template_p_shifted[indxt])
 
 
 # ### Listen to the frequency-shifted template and data
@@ -852,7 +852,7 @@ utils.write_wavfile(eventname+"_template_shifted.wav",int(fs), template_p_shifte
 # In[20]:
 
 
-fna = eventname+"_template_shifted.wav"
+fna = 'audio/'+eventname+"_template_shifted.wav"
 print(fna)
 Audio(fna)
 
@@ -860,7 +860,7 @@ Audio(fna)
 # In[21]:
 
 
-fna = eventname+"_H1_shifted.wav"
+fna = 'audio/'+eventname+"_H1_shifted.wav"
 print(fna)
 Audio(fna)
 
@@ -939,11 +939,17 @@ dat = [times[irange], strain_H1_whitenbp[irange],strain_L1_whitenbp[irange],
       template_H1[irange],template_L1[irange] ]
 datcsv = np.array(dat).transpose()
 # make a csv filename, header, and format
-fncsv = eventname+'_data.csv'
+fncsv = 'data/'+eventname+'_data.csv'
 headcsv = eventname+' time-'+str(tevent)+     ' (s),H1_data_whitened,L1_data_whitened,H1_template_whitened,L1_template_whitened'
 fmtcsv = ",".join(["%10.6f"] * 5)
 np.savetxt(fncsv, datcsv, fmt=fmtcsv, header=headcsv)
 
 print("Wrote whitened data to file {0}".format(fncsv))
 print("You can download this file by clicking 'jupyter' in the top left corner, or using the 'data' menu in Azure.")
+
+
+# In[ ]:
+
+
+
 
