@@ -1,5 +1,5 @@
 from ligotools import readligo as rl
-from ligotools import utils as u
+from ligotools import utils
 import numpy as np
 from os.path import exists
 from os import remove
@@ -8,44 +8,70 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.signal import butter, filtfilt
+import json
+
+strain_H1, time_H1, chan_dict_H1 = rl.loaddata('./data/H-H1_LOSC_4_V2-1126259446-32.hdf5', 'H1')
+strain_L1, time_L1, chan_dict_L1 = rl.loaddata('./data/L-L1_LOSC_4_V2-1126259446-32.hdf5', 'L1')
+fs = 4096
+
 
 def test_whiten():
-	strain_H1, time_H1, chan_dict_H1 = rl.loaddata("data/H-H1_LOSC_4_V2-1126259446-32.hdf5", 'H1')
+	dt = time_H1[1] - time_H1[0]
 	fs = 4096
 	NFFT = 4*fs
-	time = time_H1
 	Pxx_H1, freqs = mlab.psd(strain_H1, Fs = fs, NFFT = NFFT)
 	psd_H1 = interp1d(freqs, Pxx_H1)
-	dt = time[1] - time[0]
-	strain_H1_whiten = u.whiten(strain_H1,psd_H1,dt)
-	assert (starin_H1_whiten is not None)
+	strain_H1_whiten = utils.whiten(strain_H1,psd_H1,dt)
+	assert strain_H1_whiten.shape == (131072, )
 
-# def test_write_wavfile():
-# 	data = np.array([0,1,2,3,4,5,5,6,1,23,31,4,2,141,5,5,7])
-# 	fs = 26
-# 	utils.write_wavfile("audio/tempo.wav", fs, data)
-# 	assert exists("audio/tempo.wav")
-# 	remove("audio/tempo.wav")
+def test_write_wavfile():
+	data = np.array([0,1,2,3,4,5,5,6,1,23,31,4,2,141,5,5,7])
+	fs = 26
+	utils.write_wavfile("audio/tempo.wav", fs, data)
+	assert exists("audio/tempo.wav")
+	remove("audio/tempo.wav")
 
-# def test_reqshift():
-# 	data = np.linspace(0,1000,100)
-# 	assert sum(utils.reqshift(data,fshift=204,sample_rate=2048))== -2.2737367544323206e-13
+def test_reqshift():
+	data_path = 'data/'
+	fnjson = "BBH_events_v3.json"
+	events = json.load(open(data_path+fnjson,"r"))
+	eventname = 'GW150914' 
+	event = events[eventname]
+	fn_H1 = event['fn_H1']   
+	fs = event['fs'] 
+	NFFT = 4*fs
+	fshift = 400.
+	speedup = 1.
+	dt = time_L1[1] - time_L1[0]
+	fss = int(float(fs)*float(speedup))
+	Pxx_L1, freqs = mlab.psd(strain_L1, Fs = fs, NFFT = NFFT)
+	psd_L1 = interp1d(freqs, Pxx_L1)
+	strain_L1_whiten = utils.whiten(strain_L1,psd_L1,dt)
+	strain_L1_shifted = utils.reqshift(strain_L1_whiten,fshift=fshift,sample_rate=fs)
+	assert strain_L1_shifted is not None
+	assert strain_L1_shifted.shape == (131072,)
 
-# def test_plot_whitened():
-# 	strain_H1, time_H1, chan_dict_H1 = rl.loaddata("data/H-H1_LOSC_4_V2-1126259446-32.hdf5", 'H1')
-# 	fs = 4096
-# 	NFFT = 4*fs
-# 	fband = [43.0, 300.0]
-# 	time = time_H1
-# 	Pxx_H1, freqs = mlab.psd(strain_H1, Fs = fs, NFFT = NFFT)
-# 	psd_H1 = interp1d(freqs, Pxx_H1)
-# 	dt = time[1] - time[0]
-# 	strain_H1_whiten = u.whiten(strain_H1,psd_H1,dt)
-# 	bb, ab = butter(4, [fband[0]*2./fs, fband[1]*2./fs], btype='band')
-# 	normalization = np.sqrt((fband[1]-fband[0])/(fs/2))
-# 	strain_H1_whitenbp = filtfilt(bb, ab, strain_H1_whiten) / normalization
-# 	timemax = time[6]
-# 	u.plot_whitened(time = time, tevent = 1126259462.44, strain_H1_whitenbp, 'g', dets = 'H1',
-# 					timemax = timemax, template_match = strain_H1_whitenbp, eventname = 'GW150914', plottype = "png")
-# 	assert exists('figures/'+'GW150914'+"_"+"H1"+"_matchtime."+"png")
-# 	remove('figures/'+'GW150914'+"_"+"H1"+"_matchtime."+"png")
+def test_make_plot():
+    try:
+        time = [10000,100000]
+        timemax = 1000
+        SNR = [0, 1]
+        pcolor = 'g'
+        det = "L1"
+        eventname = "GW150914"
+        plottype = "png"
+        tevent = 1126259462.44
+        strain_whitenbp = [0, 1]
+        template_match = [0, 1]
+        template_fft = [0, 1]
+        datafreq = [0, 1]
+        d_eff = 999.743130306333
+        freqs = [0, 1]
+        data_psd = [0, 1]
+        fs = 4096
+        util.make_plot(time, timemax, SNR, pcolor, det, eventname, 
+                                    plottype, tevent, strain_whitenbp, template_match, 
+                                    template_fft, datafreq, d_eff, freqs, data_psd, fs)   
+        assert False
+    except Exception:
+        assert True

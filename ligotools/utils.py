@@ -35,8 +35,7 @@ def reqshift(data,fshift=100,sample_rate=4096):
 	z = np.fft.irfft(y)
 	return z
 
-
-def plot_SNR(time, timemax, SNR, pcolor, eventname, det, plottype):
+def make_plot(time, timemax, SNR, pcolor, det, figures_path, eventname, plottype, tevent, strain_whitenbp, template_match, template_fft, datafreq, d_eff, freqs, data_psd, fs):
 	plt.figure(figsize=(10,8))
 	plt.subplot(2,1,1)
 	plt.plot(time-timemax, SNR, pcolor,label=det+' SNR(t)')
@@ -57,9 +56,8 @@ def plot_SNR(time, timemax, SNR, pcolor, eventname, det, plottype):
 	plt.grid('on')
 	plt.xlabel('Time since {0:.4f}'.format(timemax))
 	plt.legend(loc='upper left')
-	plt.savefig('figures/'+eventname+"_"+det+"_SNR."+plottype)
+	plt.savefig(figures_path+eventname+"_"+det+"_SNR."+plottype)
 
-def plot_whitened(time, tevent, strain_whitenbp, pcolor, det, timemax, template_match, eventname, plottype):
 	plt.figure(figsize=(10,8))
 	plt.subplot(2,1,1)
 	plt.plot(time-tevent,strain_whitenbp,pcolor,label=det+' whitened h(t)')
@@ -81,11 +79,10 @@ def plot_whitened(time, tevent, strain_whitenbp, pcolor, det, timemax, template_
 	plt.ylabel('whitened strain (units of noise stdev)')
 	plt.legend(loc='upper left')
 	plt.title(det+' Residual whitened data after subtracting template around event')
-	plt.savefig('figures/'+eventname+"_"+det+"_matchtime."+plottype)
-                 
-# -- Display PSD and template
-# must multiply by sqrt(f) to plot template fft on top of ASD:
-def plot_ASD(template_fft,datafreq, d_eff, freqs, data_psd, pcolor, det, fs, eventname, plottype):
+	plt.savefig(figures_path+eventname+"_"+det+"_matchtime."+plottype)
+
+	# -- Display PSD and template
+	# must multiply by sqrt(f) to plot template fft on top of ASD:
 	plt.figure(figsize=(10,6))
 	template_f = np.absolute(template_fft)*np.sqrt(np.abs(datafreq)) / d_eff
 	plt.loglog(datafreq, template_f, 'k', label='template(f)*sqrt(f)')
@@ -97,4 +94,4 @@ def plot_ASD(template_fft,datafreq, d_eff, freqs, data_psd, pcolor, det, fs, eve
 	plt.ylabel('strain noise ASD (strain/rtHz), template h(f)*rt(f)')
 	plt.legend(loc='upper left')
 	plt.title(det+' ASD and template around event')
-	plt.savefig('figures/'+eventname+"_"+det+"_matchfreq."+plottype)
+	plt.savefig(figures_path+eventname+"_"+det+"_matchfreq."+plottype)

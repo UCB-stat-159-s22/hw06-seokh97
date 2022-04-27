@@ -13,7 +13,7 @@ def test_dq_channel_to_seglist():
 	assert np.array_equal(rl.dq_channel_to_seglist(c),[slice(0, 131072, None)])
 
 def test_FileList_searchdir():
-	hdf5_files = rl.FileList().searchdir('ligotools/')
+	hdf5_files = rl.FileList().searchdir('./ligotools/')
 	assert np.array_equal(hdf5_files, [])
 
 def test_read_hdf5():
