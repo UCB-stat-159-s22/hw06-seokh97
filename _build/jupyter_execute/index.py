@@ -760,9 +760,9 @@ for det in dets:
             template_H1 = template_match.copy()
 
         # -- Plot the result
-        utils.plot_SNR(time, timemax, SNR, pcolor, eventname, det, plottype)
-        utils.plot_whitened(time, tevent, strain_whitenbp, pcolor, det, timemax, template_match, eventname, plottype)
-        utils.plot_ASD(template_fft,datafreq, d_eff, freqs, data_psd, pcolor, det, fs, eventname, plottype)
+        utils.make_plot(time, timemax, SNR, pcolor, det, './figures/', 
+                             eventname, plottype, tevent, strain_whitenbp, 
+                             template_match, template_fft, datafreq, d_eff, freqs, data_psd, fs)
 
 
 # ### Notes on these results

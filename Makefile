@@ -1,4 +1,4 @@
-.PHONY : html html-hub all clean env
+.PHONY : html conf.py html-hub all clean env
 
 html: 
 	jupyter-book build .
